@@ -1,0 +1,399 @@
+---
+title: "A Brief Introduction to Dimensionality Reduction"
+author: Owen
+date: today
+date-format: long
+format: revealjs
+---
+
+```{r, echo = FALSE}
+library(ggplot2)
+library(magrittr)
+library(scatterplot3d)
+library(Seurat)
+```
+
+```{css, echo = FALSE}
+.justify {
+  text-align: center
+}
+```
+
+::: {.r-fit-text .absolute top=200}
+Or...what on earth are PCA, t-SNE and UMAP??? 
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca_example_data <- data.frame(gene_a = c(1, 1.4, 2.5, 8.6, 9.5, 9.3), 
+                               gene_b = c(9.2, 8, 9.7, 2.3, 1.8, 1.2),
+                               group = c("1", "1", "1", "2", "2", "2"))
+
+pca <- prcomp(pca_example_data %>% dplyr::select(-group))
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+d <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], group = pca_example_data$group)
+
+ggplot(data = d, aes_string(x = "PC1", y = "PC2", colour = "group")) +
+      scale_colour_manual(values = c("grey", "black")) +
+      geom_point(size = 3) + 
+      xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
+      ylab(paste0("PC2: ", round(percentVar[2] *  100), "% variance")) + 
+      theme_classic() +
+      theme(axis.text = element_text(size=18),
+            axis.title = element_text(size=24)) +
+    theme(legend.position = "none")
+```
+:::
+
+## t-SNE
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+mouse.combined_2 <- readRDS(file = "mouse.rds")
+DimPlot(mouse.combined_2, reduction = "tsne", label=FALSE)
+```
+:::
+
+## UMAP
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "umap", label=FALSE)
+```
+:::
+
+## What is dimensionality reduction?
+
+::: {.justify .absolute top=200}
+"Dimensionality reduction is the transformation of data from a high-dimensional space into a low-dimensional space so that the low-dimensional representation retains some meaningful properties of the original data"
+:::
+
+## Hopefully, I can explain...
+
+::: {.incremental}
+- PCA: reasonably well
+- t-SNE: the principles
+- UMAP: 😬
+:::
+
+# Principal component analysis
+
+## Principal component analysis
+
+::: {.absolute top=100}
+![](pca_maths.png)
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca_example_data <- data.frame(gene_a = c(1, 1.4, 2.5, 8.6, 9.5, 9.3), 
+                               gene_b = c(9.2, 8, 9.7, 2.3, 1.8, 1.2),
+                               group = c("1", "1", "1", "2", "2", "2"))
+
+
+pca_example_plot <- pca_example_data %>% ggplot(aes(x = gene_a, y = gene_b, colour = group)) +
+  scale_colour_manual(values = c("grey", "black")) +
+  geom_point(size = 3) + 
+  xlim(0, 10) + ylim(0, 10) +
+  xlab("Gene A") + ylab("Gene B") +
+  theme_classic() +
+  theme(axis.text = element_text(size=18),
+        axis.title = element_text(size=24)) + 
+  theme(legend.position = "none")
+
+pca_example_plot
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca_example_plot <- pca_example_plot +
+  geom_segment(x = 0.3, y = 10.5, xend = 10.3, yend = 0.5, colour = "red", arrow = arrow()) + 
+  geom_segment(x = 10.3, y = 0.5, xend = 0.3, yend = 10.5, colour = "red", arrow = arrow())
+
+pca_example_plot
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca_example_plot <- pca_example_plot +
+  geom_segment(x = 4, y = 4, xend = 7, yend = 7, colour = "blue", arrow = arrow()) + 
+  geom_segment(x = 7, y = 7, xend = 4, yend = 4, colour = "blue", arrow = arrow())
+
+pca_example_plot
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca <- prcomp(pca_example_data %>% dplyr::select(-group))
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+d <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], group = pca_example_data$group)
+
+ggplot(data = d, aes_string(x = "PC1", y = "PC2", colour = "group")) +
+      scale_colour_manual(values = c("grey", "black")) +
+      geom_point(size = 3) + 
+      xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
+      ylab(paste0("PC2: ", round(percentVar[2] *  100), "% variance")) + 
+      geom_segment(x = -6, y = 0, xend = 6, yend = 0, colour = "red", arrow = arrow()) + 
+      geom_segment(x = 6, y = 0, xend = -6, yend = 0, colour = "red", arrow = arrow()) +
+      geom_segment(x = 0, y = -0.75, xend = 0, yend = 1, colour = "blue", arrow = arrow()) + 
+      geom_segment(x = 0, y = 1, xend = 0, yend = -0.75, colour = "blue", arrow = arrow()) +
+      theme_classic() +
+      theme(axis.text = element_text(size=18),
+            axis.title = element_text(size=24)) +
+    theme(legend.position = "none")
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca_example_data_2 <- data.frame(gene_a = c(1, 1.4, 2.5, 8.6, 9.5, 9.3), 
+                               gene_b = c(9.2, 8, 9.7, 2.3, 1.8, 1.2),
+                               gene_c = c(3.2, 3.0, 2.7, 5.7, 6.1, 6.2))
+
+scatterplot3d(pca_example_data_2[,1:3],
+              xlab = "Gene A",
+              ylab = "Gene B",
+              zlab = "Gene C",
+              color = c("grey", "grey", "grey", "black", "black", "black"),
+              cex.axis = 1, cex.lab = 2,
+              pch = 16,
+              xlim=c(0, 10), ylim=c(0, 10), zlim=c(0, 7), 
+              grid=TRUE, box=FALSE)
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+scatterplot3d(pca_example_data_2[,1:3],
+              xlab = "Gene A",
+              ylab = "Gene B",
+              zlab = "Gene C",
+              color = c("grey", "grey", "grey", "black", "black", "black"),
+              cex.axis = 1, cex.lab = 2,
+              pch = 16, type = "h",
+              xlim=c(0, 10), ylim=c(0, 10), zlim=c(0, 7), 
+              grid=TRUE, box=FALSE)
+```
+:::
+
+## Principal component analysis
+
+::: {.justify}
+```{r, fig.width=6, fig.height=6}
+pca <- prcomp(pca_example_data_2)
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+d <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], group = pca_example_data$group)
+
+ggplot(data = d, aes_string(x = "PC1", y = "PC2", colour = "group")) +
+      scale_colour_manual(values = c("grey", "black")) +
+      geom_point(size = 3) + 
+      xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
+      ylab(paste0("PC2: ", round(percentVar[2] *  100), "% variance")) + 
+      geom_segment(x = -6, y = 0, xend = 6, yend = 0, colour = "red", arrow = arrow()) + 
+      geom_segment(x = 6, y = 0, xend = -6, yend = 0, colour = "red", arrow = arrow()) +
+      geom_segment(x = 0, y = 0.75, xend = 0, yend = -1, colour = "blue", arrow = arrow()) + 
+      geom_segment(x = 0, y = -1, xend = 0, yend = 0.75, colour = "blue", arrow = arrow()) +
+      theme_classic() +
+      theme(axis.text = element_text(size=18),
+            axis.title = element_text(size=24)) +
+       theme(legend.position = "none")
+```
+:::
+
+# T-distributed Stochastic Neighbor Embedding (t-SNE)
+
+## t-SNE
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "tsne", label=FALSE)
+```
+:::
+
+## t-SNE
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "pca", label=FALSE)
+```
+:::
+
+## t-SNE
+
+::: {.justify .absolute top=200}
+"t-SNE is a nonlinear dimensionality reduction technique for embedding high-dimensional data for visualization in a low-dimensional space of two or three dimensions. Specifically, it models each high-dimensional object by a two- or three-dimensional point in such a way that similar objects are modeled by nearby points and dissimilar objects are modeled by distant points with high probability."
+:::
+
+## t-SNE
+
+::: {.justify .absolute top=200}
+"t-SNE is a [nonlinear dimensionality reduction technique]{style="color:red;"} for embedding high-dimensional data for visualization in a low-dimensional space of two or three dimensions. Specifically, it models each high-dimensional object by a two- or three-dimensional point in such a way that similar objects are modeled by nearby points and dissimilar objects are modeled by distant points with high probability."
+:::
+
+## t-SNE
+
+::: {.justify .absolute top=200}
+"t-SNE is a [nonlinear dimensionality reduction technique]{style="color:red;"} for embedding high-dimensional data for visualization in a low-dimensional space of two or three dimensions. Specifically, it models each high-dimensional object by a two- or three-dimensional point in such a way that [similar objects are modeled by nearby points and dissimilar objects are modeled by distant points]{style="color:red;"} with high probability."
+:::
+
+## t-SNE
+
+Two main stages:
+
+::: {.incremental}
+- construct a probability distribution, $p_{ij}$, over pairs of high-dimensional objects in such a way that similar objects are assigned a higher probability while dissimilar points are assigned a lower probability
+- define a similar probability distribution, $q_{ij}$, over the points in a low-dimensional map, minimizing the divergence between the two distributions with respect to the locations of the points in the map
+:::
+
+## t-SNE
+
+What does the name mean?
+
+::: {.incremental}
+- _t-distributed_ - a heavy-tailed Student t-distribution is used to measure similarities between low-dimensional points in order to allow dissimilar objects to be modeled far apart in the map
+- _stochastic_ - minimization of divergence between higher- and two-dimensional distributions is performed by gradient descent
+:::
+
+## t-SNE
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "pca", label=FALSE)
+```
+:::
+
+## t-SNE
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "tsne", label=FALSE)
+```
+:::
+
+## t-SNE
+
+Problems:
+
+::: {.incremental}
+- stochastic
+- many potential parameters
+- performance suffers with large datasets
+- what does distance actually mean?
+:::
+
+# Uniform Manifold Approximation and Projection (UMAP)
+
+## UMAP
+
+UMAP claims to improve over t-SNE by...
+
+::: {.incremental}
+- solving performance problems with large datasets
+- better preserving the data's "global structure"
+:::
+
+## UMAP
+
+::: {.justify .absolute top=100}
+"At a high level, UMAP uses local manifold approximations and patches together their local fuzzy simplicial set representations to construct a topological representation of the high dimensional data. Given some low dimensional representation of the data, a similar process can be used to construct an equivalent topological representation. UMAP then optimizes the layout of the data representation in the low dimensional space, to minimize the cross-entropy between the two topological representations."
+:::
+
+## UMAP
+
+::: {.justify .absolute top=100}
+"At a high level, UMAP uses local manifold approximations and patches together their local fuzzy simplicial set representations to construct [a topological representation of the high dimensional data]{style="color:red;"}. Given some low dimensional representation of the data, a similar process can be used to construct an equivalent topological representation. UMAP then optimizes the layout of the data representation in the low dimensional space, to minimize the cross-entropy between the two topological representations."
+:::
+
+## UMAP
+
+::: {.justify .absolute top=100}
+"At a high level, UMAP uses local manifold approximations and patches together their local fuzzy simplicial set representations to construct [a topological representation of the high dimensional data]{style="color:red;"}. Given some [low dimensional representation of the data]{style="color:red;"}, a similar process can be used to construct an [equivalent topological representation]{style="color:red;"}. UMAP then optimizes the layout of the data representation in the low dimensional space, to minimize the cross-entropy between the two topological representations."
+:::
+
+## UMAP
+
+::: {.justify .absolute top=100}
+"At a high level, UMAP uses local manifold approximations and patches together their local fuzzy simplicial set representations to construct [a topological representation of the high dimensional data]{style="color:red;"}. Given some [low dimensional representation of the data]{style="color:red;"}, a similar process can be used to construct an [equivalent topological representation]{style="color:red;"}. UMAP then [optimizes the layout of the data representation in the low dimensional space, to minimize the cross-entropy between the two topological representations]{style="color:red;"}."
+:::
+
+## UMAP
+
+::: {.absolute top=100}
+![](maths_horror.png)
+:::
+
+## UMAP
+
+UMAP claims to improve over t-SNE by...
+
+::: {.incremental}
+- solving performance problems with large datasets
+- better preserving the data's "global structure"
+:::
+
+## UMAP
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "tsne", label=FALSE)
+```
+:::
+
+## UMAP
+
+::: {.justify}
+```{r, fig.width=9, fig.height=6}
+DimPlot(mouse.combined_2, reduction = "umap", label=FALSE)
+```
+:::
+
+# Quarto
+
+## What is Quarto?
+
+![](quarto.png)
+
+## Presentation created from code...
+
+::: {.justify}
+```{r, fig.width=5, fig.height=5}
+#| echo: true
+#| code-fold: true
+pca_example_data <- data.frame(gene_a = c(1, 1.4, 2.5, 8.6, 9.5, 9.3), 
+                               gene_b = c(9.2, 8, 9.7, 2.3, 1.8, 1.2),
+                               group = c("1", "1", "1", "2", "2", "2"))
+
+pca <- prcomp(pca_example_data %>% dplyr::select(-group))
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+d <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], group = pca_example_data$group)
+
+ggplot(data = d, aes_string(x = "PC1", y = "PC2", colour = "group")) +
+      scale_colour_manual(values = c("grey", "black")) +
+      geom_point(size = 3) + 
+      xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
+      ylab(paste0("PC2: ", round(percentVar[2] *  100), "% variance")) + 
+      theme_classic() +
+      theme(axis.text = element_text(size=18),
+            axis.title = element_text(size=24)) +
+    theme(legend.position = "none")
+```
+:::
+
+## Presentation created from code...
