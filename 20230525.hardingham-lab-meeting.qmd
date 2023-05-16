@@ -397,3 +397,7 @@ ggplot(data = d, aes_string(x = "PC1", y = "PC2", colour = "group")) +
 :::
 
 ## Presentation created from code...
+
+::: {.absolute top=200}
+[GitHub repository](https://github.com/lweasel/dim_reduction_lab_meeting)
+:::
