@@ -3,7 +3,10 @@ title: "A Brief Introduction to Dimensionality Reduction"
 author: Owen
 date: today
 date-format: long
-format: revealjs
+format: 
+  revealjs:
+    logo: logo.svg
+    footer: "A Brief Introduction to Dimensionality Reduction"
 ---
 
 ```{r, echo = FALSE}
@@ -370,12 +373,13 @@ DimPlot(mouse.combined_2, reduction = "umap", label=FALSE)
 
 ![](quarto.png)
 
-## Presentation created from code...
+## Presentation created from code... {.scrollable}
 
 ::: {.justify}
 ```{r, fig.width=5, fig.height=5}
 #| echo: true
 #| code-fold: true
+#| code-line-numbers: "|1-3|5-7|9-17"
 pca_example_data <- data.frame(gene_a = c(1, 1.4, 2.5, 8.6, 9.5, 9.3), 
                                gene_b = c(9.2, 8, 9.7, 2.3, 1.8, 1.2),
                                group = c("1", "1", "1", "2", "2", "2"))
