@@ -77,6 +77,18 @@ mouse.combined_2 %>% DimPlot(reduction = "umap", label=FALSE)
 "Dimensionality reduction is the transformation of data from a high-dimensional space into a low-dimensional space so that the low-dimensional representation retains some meaningful properties of the original data"
 :::
 
+## What is dimensionality reduction?
+
+::: {.justify .absolute top=200}
+"Dimensionality reduction is the [transformation of data from a high-dimensional space into a low-dimensional space]{style="color:red;"} so that the low-dimensional representation retains some meaningful properties of the original data"
+:::
+
+## What is dimensionality reduction?
+
+::: {.justify .absolute top=200}
+"Dimensionality reduction is the transformation of data from a high-dimensional space into a low-dimensional space so that [the low-dimensional representation retains some meaningful properties of the original data]{style="color:red;"}"
+:::
+
 ## Hopefully, I can explain...
 
 ::: {.incremental}
